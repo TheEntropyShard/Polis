@@ -1,0 +1,138 @@
+# 🇺🇸 MOZZ.US 🇺🇸
+
+```
+___________..._
+________.'     '.      _
+_______/    .-""-\   _/ \
+_____.-|   /:.   |  |   |
+_____|  \  |:.   /.-'-./
+_____| .-'-;:__.'    =/
+_____.'=  *=|NASA _.='
+____/   _.  |    ;
+___;-.-'|    \   |
+__/   | \    _\  _\
+__\__/'._;.  ==' ==\
+___________\    \   |
+___________/    /   /
+___________/-._/-._/
+____jgs____\   `\  \
+____________`-._/._/
+
+"I didn't feel like a giant. I felt
+very, very small." - Neil Armstrong
+```
+
+## 🍕 About
+
+This is my personal gemini capsule. It was launched on August 7, 2019, making it the 5th gemini server in existence!
+
+Some of my interests include:
+
+* internet history (technologies, design, subcultures, etc.)
+* restoring ancient software
+* building little applications and games, ie. vignettes
+* creating art and music (quite poorly)
+
+I also run a gopher server with some cool stuff on it.
+=>gopher://mozz.us
+
+## 🌯 Local Services
+
+💯 BRAND NEW CONTENT! 💯
+=>/dark-silk/ Dark Silk - Chinese/Taiwan ANSI Art Collection
+
+Undoubtedly the most interesting thing on this capsule. 👇
+🌱 • 🛰️ • 🌷 • 🐝 • 🚀 • 🌵 • 👩‍🚀
+=>gemini://astrobotany.mozz.us Astrobotany - A community garden
+🥕 • 🔭 • 🌺 • 👩‍🔬 • 🌍 • 👨‍🌾 • 🌧️
+
+Learn about the new hotness 🔥 spartan:// 🔥 transfer protocol.
+=>gemini://spartan.mozz.us The Spartan Protocol Homepage
+
+Join an empty chatroom and leave an insightful message like "Is anyone here?" or "this is a test post".
+=>gemini://chat.mozz.us Gemini Chat - An experimental chatroom
+
+For those of us who are too lazy to install a REAL client.
+=>https://portal.mozz.us A gemini -> HTTP proxy server (portal.mozz.us)
+
+The Gemini Wayback Machine™
+=>/archive/ An archive of geminispace from late 2020
+
+The self-proclaimed largest collection of ASCII Art on the internet!
+=>gemini://ascii.mozz.us:7070 The ASCII Art Emporium
+
+## ✈️ Flight Journals
+
+A "flight journal" was an early name for gemini logs before "gemlog" came about.
+
+My main gemlog, which mostly contains either software related or meta-commentary about gemini.
+=>/journal/ Mozz.us Gemlog 💎
+
+A secret (🤫) tinylog with my ramblings on ASCII art.
+=>/ascii-art/ ASCII Art Tinylog 🎨
+
+This was my first attempt to add original content to gemini, back when there were only a handful of capsules around.
+=>/beer/ My advent calendar beer reviews (2019) 🍻
+
+## 🎸 Gemini Software
+
+Most of my software is written in python and hosted on Github 😈.
+
+The server powering this capsule and (dozens?) of other capsules across gemini. All of the good ones, at least.
+=>https://github.com/michael-lazar/jetforce jetforce - gemini server & framework
+
+An extensive tool that I built to crawl and archive all of geminispace.
+=>https://github.com/michael-lazar/mozz-archiver mozz-archiver - gemini crawler and archival tool
+
+A script that will tell you how bad of a programmer you are.
+=>https://github.com/michael-lazar/gemini-diagnostics gemini-diagnostics - diagnostic tool for gemini servers
+
+A gopher server from the 2000's that I've been porting to python 3. Along the way, I also added support for gemini://.
+=>https://github.com/michael-lazar/pygopherd pygopherd - gopher server (now supports gemini too!)
+
+The source code for the astrobotany server. A great resource if you want to learn how to cheat at the game.
+=>https://github.com/michael-lazar/astrobotany astrobotany - a community garden (source code)
+
+## 🌊 Spicy Content
+
+Recommendations you never asked for!
+=>/games.gmi A list of my favorite PC games
+
+A huge dump of gemini:// links for crawlers to choke on (updated nightly)
+=>/files/gemini-links.gmi Gemini URLs scraped from the mailing list
+
+😤 TRIGGER WARNING! 😤 The most controversial proposal in geminispace.
+=>/files/rfc_gemini_favicon.gmi An RFC for adding emoji favicons to gemini
+
+Some early geminispace statistics (for the real OGs only)
+=>/diagnostics/ Gemini diagnostics results and notes
+
+My proposal for a markdown dialect for "text/gemini", from the dark days when text/gemini was hard-wrapped and "=>" was the only line type (oh my!). Some of these ideas made it into the current gemtext spec. I still maintain that "---" horizontal line break would have been a worthwhile addition.
+=>/markdown/ A Simple Markdown Proposal for Gemini
+
+Tests and other random documents that I've referenced at one point or another.
+=> /files/
+
+## 🕶 CGI Scripts
+
+A demonstration on using self-signed and CA-verified client certificates.
+=>/tls/ TOP SECRET GOVERNMENT INTEL
+
+Little toys that aren't worth your time.
+=>/cgi-bin/fortune 🔮 Fortune
+=>/cgi-bin/cowsay 🐄 Cowsay Generator
+=>/cgi-bin/wttr 🌦 Weather Report (uses ANSI escape codes)
+
+## 📚 Epilogue
+
+LEO Web Ring
+=> gemini://tilde.team/~khuxkm/leo/ About LEO
+=> gemini://tilde.team/~khuxkm/leo/next.cgi?gemini%3A%2F%2Fmozz.us Next Page
+=> gemini://tilde.team/~khuxkm/leo/prev.cgi?gemini%3A%2F%2Fmozz.us Last Page
+=> gemini://tilde.team/~khuxkm/leo/rand.cgi Random Page
+
+=> mailto://michael@mozz.us Contact me: michael@mozz.us
+
+All content on this capsule is copyright unless otherwise noted.
+
+My cat's breath smells like cat food.
