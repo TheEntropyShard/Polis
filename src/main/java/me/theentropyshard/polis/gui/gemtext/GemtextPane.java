@@ -32,6 +32,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +109,7 @@ public class GemtextPane extends JTextPane {
     }
 
     private void writeLine(String text, MutableAttributeSet characterAttrs, MutableAttributeSet paragraphAttrs) {
-        text = text + "\n";
+        text = Normalizer.normalize(text + "\n", Normalizer.Form.NFKC);
 
         List<IndexedEmoji> indexedEmojis = EmojiManager.extractEmojisInOrderWithIndex(text);
 
