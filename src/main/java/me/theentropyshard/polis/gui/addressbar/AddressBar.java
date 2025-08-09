@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 
 public class AddressBar extends JToolBar {
     private final JTextField uriField;
+    private final JButton moreButton;
 
     public AddressBar(Consumer<String> inputConsumer) {
         super(JToolBar.HORIZONTAL);
@@ -70,9 +71,9 @@ public class AddressBar extends JToolBar {
         });
         this.add(this.uriField);
 
-        JButton moreButton = new JButton(AddressBar.loadIcon("more_vert_24"));
-        moreButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
-        this.add(moreButton);
+        this.moreButton = new JButton(AddressBar.loadIcon("more_vert_24"));
+        this.moreButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
+        this.add(this.moreButton);
     }
 
     private static FlatSVGIcon loadIcon(String name) {
@@ -84,5 +85,9 @@ public class AddressBar extends JToolBar {
 
     public void setCurrentUri(String uri) {
         this.uriField.setText(uri);
+    }
+
+    public JButton getMoreButton() {
+        return this.moreButton;
     }
 }

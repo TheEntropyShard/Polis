@@ -24,12 +24,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 
 import me.theentropyshard.polis.gemini.client.GeminiClient;
 import me.theentropyshard.polis.gemini.client.GeminiRequest;
 import me.theentropyshard.polis.gemini.client.GeminiResponse;
 import me.theentropyshard.polis.gemini.gemtext.GemtextParser;
+import me.theentropyshard.polis.gemini.gemtext.document.GemtextH1Element;
+import me.theentropyshard.polis.gemini.gemtext.document.GemtextParagraphElement;
 import me.theentropyshard.polis.gui.addressbar.AddressBar;
 import me.theentropyshard.polis.gui.gemtext.GemtextPane;
 
@@ -41,7 +44,9 @@ public class Tab extends JPanel {
 
     private URI currentUri;
 
-    public Tab(String url, GeminiClient client) {
+    private SwingWorker<Void, Void> currentWorker;
+
+    public Tab(GeminiClient client) {
         this.client = client;
 
         this.addressBar = new AddressBar(input -> {
@@ -54,13 +59,25 @@ public class Tab extends JPanel {
             this.reload();
         });
 
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem savePageItem = new JMenuItem("Save page");
+        popupMenu.add(savePageItem);
+
+        this.addressBar.getMoreButton().addActionListener(e -> {
+            JButton b = (JButton) e.getSource();
+
+            popupMenu.show(this, this.getParent().getPreferredSize().width - popupMenu.getPreferredSize().width, b.getY() + b.getPreferredSize().height);
+        });
+
         this.pane = new GemtextPane(link -> {
             this.currentUri = this.currentUri.resolve(link);
 
             this.reload();
         });
 
-        this.currentUri = URI.create(url);
+        savePageItem.addActionListener(e -> {
+
+        });
 
         JScrollPane scrollPane = new JScrollPane(
             this.pane,
@@ -74,7 +91,7 @@ public class Tab extends JPanel {
         this.add(this.addressBar, BorderLayout.NORTH);
         this.add(scrollPane, BorderLayout.CENTER);
 
-        this.load();
+        this.loadFromFile(new File("src/main/resources/simple.gmi"));
     }
 
     public void load(String location, InputStream inputStream) throws IOException {
@@ -94,30 +111,38 @@ public class Tab extends JPanel {
         }.execute();
     }
 
-    private void load() {
-        this.updateAddressBar();
+    public void loadFromUrl(String url) {
+        this.currentUri = URI.create(url);
 
-        new SwingWorker<Void, Void>() {
+        this.currentWorker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws Exception {
-                try (GeminiResponse response = Tab.this.client.send(new GeminiRequest(Tab.this.currentUri.toASCIIString()))) {
-                    Tab.this.load(Tab.this.currentUri.toASCIIString(), response.getInputStream());
+                try (GeminiResponse response = Tab.this.client.send(new GeminiRequest(url))) {
+                    Tab.this.load(url, response.getInputStream());
+                } catch (UnknownHostException e) {
+                    SwingUtilities.invokeLater(() -> {
+                        pane.clear();
+                        pane.writeElement(new GemtextH1Element("Unknown host «" + currentUri.getHost() + "»"));
+                        pane.writeElement(new GemtextParagraphElement("Host «" + currentUri.getHost() + "» does not exist. " +
+                            "Check if the URL is correct."));
+                    });
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    SwingUtilities.invokeLater(() -> {
+                        pane.clear();
+                        pane.writeElement(new GemtextH1Element("Error loading " + url));
+                        pane.writeElement(new GemtextParagraphElement(e.toString()));
+                    });
                 }
 
                 return null;
             }
-        }.execute();
+        };
+        this.currentWorker.execute();
     }
 
     private void reload() {
         this.pane.clear();
 
-        this.load();
-    }
-
-    public void updateAddressBar() {
-        this.addressBar.setCurrentUri(this.currentUri.toString());
+        this.loadFromUrl(this.currentUri.toString());
     }
 }

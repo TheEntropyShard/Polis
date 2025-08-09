@@ -43,12 +43,12 @@ public class Gui {
         this.tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (IntConsumer) this::onTabClose);
 
         this.tabbedPane.setDropTarget(new FileDropTarget(file -> {
-            Tab tab = new Tab("https://google.com/", this.client);
+            Tab tab = new Tab(this.client);
             tab.loadFromFile(file);
             this.tabbedPane.addTab("Title", tab);
         }));
 
-        this.createTab("gemini://geminiprotocol.net/");
+        this.createEmptyTab();
 
         JFrame frame = new JFrame("Polis");
         frame.getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
@@ -67,8 +67,14 @@ public class Gui {
         }
     }
 
+    public void createEmptyTab() {
+        this.tabbedPane.addTab("Title", new Tab(this.client));
+    }
+
     public void createTab(String url) {
-        this.tabbedPane.addTab("Title", new Tab(url, this.client));
+        Tab tab = new Tab(this.client);
+        tab.loadFromUrl(url);
+        this.tabbedPane.addTab("Title", tab);
     }
 
     private static void prepare() {
