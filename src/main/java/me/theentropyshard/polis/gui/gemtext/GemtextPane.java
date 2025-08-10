@@ -36,7 +36,6 @@ import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import me.theentropyshard.polis.gemini.gemtext.document.*;
 import me.theentropyshard.polis.gui.emoji.EmojiSupport;
@@ -48,7 +47,7 @@ public class GemtextPane extends JTextPane {
 
     private final Map<String, String> currentEmojis;
 
-    public GemtextPane(Consumer<String> uriConsumer) {
+    public GemtextPane() {
         this.currentEmojis = new HashMap<>();
 
         Action myCopy = new AbstractAction("copy") {
@@ -74,27 +73,21 @@ public class GemtextPane extends JTextPane {
         this.addHyperlinkListener(e -> {
             HyperlinkEvent.EventType type = e.getEventType();
 
-            if (type == HyperlinkEvent.EventType.ACTIVATED) {
-                uriConsumer.accept(e.getDescription());
-            } else {
-                GemtextDocument document = (GemtextDocument) this.getDocument();
-                Element element = e.getSourceElement();
-                int startOffset = element.getStartOffset();
-                int endOffset = element.getEndOffset();
-
+            if (type == HyperlinkEvent.EventType.ENTERED || type == HyperlinkEvent.EventType.EXITED) {
                 MutableAttributeSet attrs = new SimpleAttributeSet();
 
                 if (type == HyperlinkEvent.EventType.ENTERED) {
                     StyleConstants.setForeground(attrs, Color.BLUE);
-                } else if (type == HyperlinkEvent.EventType.EXITED) {
-                    StyleConstants.setForeground(attrs, UIManager.getColor("primary"));
                 } else {
-                    throw new RuntimeException("Unknown event: " + type);
+                    StyleConstants.setForeground(attrs, UIManager.getColor("primary"));
                 }
 
-                document.setCharacterAttributes(
-                    startOffset, endOffset - startOffset, attrs, false
-                );
+                Element element = e.getSourceElement();
+                int startOffset = element.getStartOffset();
+                int endOffset = element.getEndOffset();
+
+                GemtextDocument document = (GemtextDocument) this.getDocument();
+                document.setCharacterAttributes(startOffset, endOffset - startOffset, attrs, false);
             }
         });
 
