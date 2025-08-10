@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import me.theentropyshard.polis.History;
 import me.theentropyshard.polis.gemini.client.GeminiClient;
 import me.theentropyshard.polis.gemini.client.GeminiRequest;
 import me.theentropyshard.polis.gemini.client.GeminiResponse;
@@ -46,9 +47,11 @@ public class Tab extends JPanel {
 
     private final GeminiClient client;
 
-    private final AddressBar addressBar;
+    private AddressBar addressBar;
     private final GemtextPane gemtextPane;
     private final JScrollPane scrollPane;
+
+    private final History history;
 
     private URI currentUri;
     private String hoveredUrl;
@@ -69,19 +72,8 @@ public class Tab extends JPanel {
         popupMenu.add(savePageItem);
 
         this.gemtextPane = new GemtextPane();
-        this.gemtextPane.addHyperlinkListener(e -> {
-            HyperlinkEvent.EventType type = e.getEventType();
 
-            if (type == HyperlinkEvent.EventType.ACTIVATED) {
-                this.load(this.currentUri.resolve(e.getDescription()));
-            } else if (type == HyperlinkEvent.EventType.ENTERED) {
-                this.hoveredUrl = e.getDescription();
-            } else if (type == HyperlinkEvent.EventType.EXITED) {
-                this.hoveredUrl = null;
-            }
-
-            this.repaint();
-        });
+        this.history = new History();
 
         this.addressBar = new AddressBar(input -> {
             URI uri;
@@ -103,6 +95,8 @@ public class Tab extends JPanel {
             if (path == null || path.trim().isEmpty()) {
                 uri = URI.create(uri + "/");
             }
+
+            this.historyVisit(uri);
 
             this.load(uri);
         });
@@ -164,10 +158,57 @@ public class Tab extends JPanel {
                 this.addressBar.requestFocus();
             }
         );
+
+        this.updateButtons();
+
+        this.addressBar.getBackButton().addActionListener(e -> this.navigateBack());
+        this.addressBar.getForwardButton().addActionListener(e -> this.navigateForward());
+        this.addressBar.getRefreshButton().addActionListener(e -> this.refresh());
+
+        this.gemtextPane.addHyperlinkListener(e -> {
+            HyperlinkEvent.EventType type = e.getEventType();
+
+            if (type == HyperlinkEvent.EventType.ACTIVATED) {
+                URI uri = this.currentUri.resolve(e.getDescription());
+
+                this.historyVisit(uri);
+                this.load(uri);
+            } else if (type == HyperlinkEvent.EventType.ENTERED) {
+                this.hoveredUrl = e.getDescription();
+            } else if (type == HyperlinkEvent.EventType.EXITED) {
+                this.hoveredUrl = null;
+            }
+
+            this.repaint();
+        });
+    }
+
+    private void historyVisit(URI uri) {
+        this.history.visit(uri);
+        this.updateButtons();
+    }
+
+    private void navigateBack() {
+        this.load(this.history.back());
+        this.updateButtons();
+    }
+
+    private void navigateForward() {
+        this.load(this.history.forward());
+        this.updateButtons();
+    }
+
+    private void updateButtons() {
+        this.addressBar.getBackButton().setEnabled(this.history.canNavigateBack());
+        this.addressBar.getForwardButton().setEnabled(this.history.canNavigateForward());
     }
 
     public void readStream(InputStream inputStream) throws IOException {
         new GemtextParser().parse(inputStream, this.gemtextPane::writeElement);
+    }
+
+    public void refresh() {
+        this.load(this.currentUri);
     }
 
     public void load(URI uri) {
@@ -183,7 +224,7 @@ public class Tab extends JPanel {
 
         this.currentWorker = SwingUtils.createWorker(() -> {
             try {
-                String scheme = uri.getScheme();
+                String scheme = this.currentUri.getScheme();
 
                 switch (scheme) {
                     case "gemini" -> {
