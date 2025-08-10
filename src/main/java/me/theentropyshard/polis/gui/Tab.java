@@ -20,6 +20,8 @@ package me.theentropyshard.polis.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +43,7 @@ public class Tab extends JPanel {
 
     private final AddressBar addressBar;
     private final GemtextPane pane;
+    private final JScrollPane scrollPane;
 
     private URI currentUri;
 
@@ -49,25 +52,9 @@ public class Tab extends JPanel {
     public Tab(GeminiClient client) {
         this.client = client;
 
-        this.addressBar = new AddressBar(input -> {
-            if (!input.startsWith("gemini://")) {
-                input = "gemini://" + input;
-            }
-
-            this.currentUri = URI.create(input);
-
-            this.reload();
-        });
-
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem savePageItem = new JMenuItem("Save page");
         popupMenu.add(savePageItem);
-
-        this.addressBar.getMoreButton().addActionListener(e -> {
-            JButton b = (JButton) e.getSource();
-
-            popupMenu.show(this, this.getParent().getPreferredSize().width - popupMenu.getPreferredSize().width, b.getY() + b.getPreferredSize().height);
-        });
 
         this.pane = new GemtextPane(link -> {
             this.currentUri = this.currentUri.resolve(link);
@@ -79,17 +66,45 @@ public class Tab extends JPanel {
 
         });
 
-        JScrollPane scrollPane = new JScrollPane(
+        this.scrollPane = new JScrollPane(
             this.pane,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
-        scrollPane.setUI(new FlatSmoothScrollPaneUI());
+        this.scrollPane.setUI(new FlatSmoothScrollPaneUI());
+
+        this.addressBar = new AddressBar(input -> {
+            if (!input.startsWith("gemini://")) {
+                input = "gemini://" + input;
+            }
+
+            this.currentUri = URI.create(input);
+
+            this.scrollPane.requestFocus();
+
+            this.reload();
+        });
+
+        this.addressBar.getMoreButton().addActionListener(e -> {
+            JButton b = (JButton) e.getSource();
+
+            popupMenu.show(this, this.getParent().getPreferredSize().width - popupMenu.getPreferredSize().width, b.getY() + b.getPreferredSize().height);
+        });
 
         this.setLayout(new BorderLayout());
 
         this.add(this.addressBar, BorderLayout.NORTH);
-        this.add(scrollPane, BorderLayout.CENTER);
+        this.add(this.scrollPane, BorderLayout.CENTER);
+
+        this.getActionMap().put("ctrl_l", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Tab.this.addressBar.requestFocus();
+            }
+        });
+
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK), "ctrl_l");
 
         this.loadFromFile(new File("src/main/resources/simple.gmi"));
     }
@@ -121,16 +136,16 @@ public class Tab extends JPanel {
                     Tab.this.load(url, response.getInputStream());
                 } catch (UnknownHostException e) {
                     SwingUtilities.invokeLater(() -> {
-                        pane.clear();
-                        pane.writeElement(new GemtextH1Element("Unknown host «" + currentUri.getHost() + "»"));
-                        pane.writeElement(new GemtextParagraphElement("Host «" + currentUri.getHost() + "» does not exist. " +
+                        Tab.this.pane.clear();
+                        Tab.this.pane.writeElement(new GemtextH1Element("Unknown host «" + Tab.this.currentUri.getHost() + "»"));
+                        Tab.this.pane.writeElement(new GemtextParagraphElement("Host «" + Tab.this.currentUri.getHost() + "» does not exist. " +
                             "Check if the URL is correct."));
                     });
                 } catch (Exception e) {
                     SwingUtilities.invokeLater(() -> {
-                        pane.clear();
-                        pane.writeElement(new GemtextH1Element("Error loading " + url));
-                        pane.writeElement(new GemtextParagraphElement(e.toString()));
+                        Tab.this.pane.clear();
+                        Tab.this.pane.writeElement(new GemtextH1Element("Error loading " + url));
+                        Tab.this.pane.writeElement(new GemtextParagraphElement(e.toString()));
                     });
                 }
 

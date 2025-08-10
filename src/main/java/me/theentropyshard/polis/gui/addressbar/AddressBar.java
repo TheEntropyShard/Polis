@@ -26,6 +26,8 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.function.Consumer;
 
 public class AddressBar extends JToolBar {
@@ -74,6 +76,23 @@ public class AddressBar extends JToolBar {
         this.moreButton = new JButton(AddressBar.loadIcon("more_vert_24"));
         this.moreButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
         this.add(this.moreButton);
+
+        this.uriField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                uriField.selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                uriField.select(0, 0);
+            }
+        });
+    }
+
+    @Override
+    public void requestFocus() {
+        this.uriField.requestFocus();
     }
 
     private static FlatSVGIcon loadIcon(String name) {
