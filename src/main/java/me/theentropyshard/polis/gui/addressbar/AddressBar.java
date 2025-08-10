@@ -29,6 +29,9 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 public class AddressBar extends JToolBar {
+    private final JButton backButton;
+    private final JButton forwardButton;
+    private final JButton refreshButton;
     private final JTextField uriField;
     private final JButton moreButton;
 
@@ -39,17 +42,17 @@ public class AddressBar extends JToolBar {
             UIManager.getColor("addressBarBorderColor")),
             new EmptyBorder(4, 2, 4, 2)));
 
-        JButton backButton = new JButton(AddressBar.loadIcon("arrow_back_24"));
-        backButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
-        this.add(backButton);
+        this.backButton = new JButton(AddressBar.loadIcon("arrow_back_24"));
+        this.backButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
+        this.add(this.backButton);
 
-        JButton forwardButton = new JButton(AddressBar.loadIcon("arrow_forward_24"));
-        forwardButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
-        this.add(forwardButton);
+        this.forwardButton = new JButton(AddressBar.loadIcon("arrow_forward_24"));
+        this.forwardButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
+        this.add(this.forwardButton);
 
-        JButton refreshButton = new JButton(AddressBar.loadIcon("refresh_24"));
-        refreshButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
-        this.add(refreshButton);
+        this.refreshButton = new JButton(AddressBar.loadIcon("refresh_24"));
+        this.refreshButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
+        this.add(this.refreshButton);
 
         this.uriField = new JTextField();
         this.uriField.setPreferredSize(new Dimension(0, 36));
@@ -84,6 +87,18 @@ public class AddressBar extends JToolBar {
 
     public void setCurrentUri(String uri) {
         this.uriField.setText(uri);
+    }
+
+    public JButton getBackButton() {
+        return this.backButton;
+    }
+
+    public JButton getForwardButton() {
+        return this.forwardButton;
+    }
+
+    public JButton getRefreshButton() {
+        return this.refreshButton;
     }
 
     public JButton getMoreButton() {
