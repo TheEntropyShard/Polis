@@ -105,8 +105,6 @@ public class Tab extends JPanel {
 
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
             .put(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK), "ctrl_l");
-
-        this.loadFromFile(new File("src/main/resources/simple.gmi"));
     }
 
     public void load(String location, InputStream inputStream) throws IOException {
