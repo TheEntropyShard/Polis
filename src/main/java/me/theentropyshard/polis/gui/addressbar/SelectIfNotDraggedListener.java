@@ -19,19 +19,33 @@
 package me.theentropyshard.polis.gui.addressbar;
 
 import javax.swing.text.JTextComponent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class SelectIfNotDraggedListener extends MouseAdapter {
     private final JTextComponent textComponent;
 
-    private boolean dragged;
+    private boolean canSelect = true;
 
     private SelectIfNotDraggedListener(JTextComponent textComponent) {
         this.textComponent = textComponent;
 
         textComponent.addMouseListener(this);
         textComponent.addMouseMotionListener(this);
+
+        textComponent.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                SelectIfNotDraggedListener.this.canSelect = true;
+            }
+        });
     }
 
     public static void install(JTextComponent textComponent) {
@@ -40,15 +54,15 @@ public class SelectIfNotDraggedListener extends MouseAdapter {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (!this.dragged) {
+        if (this.canSelect) {
             this.textComponent.selectAll();
-        }
 
-        this.dragged = false;
+            this.canSelect = false;
+        }
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        this.dragged = true;
+        this.canSelect = false;
     }
 }
