@@ -18,25 +18,25 @@
 
 package me.theentropyshard.polis.gui.addressbar;
 
-import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-import java.awt.*;
 import java.util.function.Consumer;
 
 public class AddressBar extends JToolBar {
     private final JButton backButton;
     private final JButton forwardButton;
     private final JButton refreshButton;
-    private final JTextField uriField;
+    private final UriField uriField;
     private final JButton moreButton;
 
     public AddressBar(Consumer<String> inputConsumer) {
         super(JToolBar.HORIZONTAL);
+
+        this.setFocusable(true);
 
         this.setBorder(
             new CompoundBorder(
@@ -54,28 +54,15 @@ public class AddressBar extends JToolBar {
         this.refreshButton = new AddressBarButton("refresh_24");
         this.add(this.refreshButton);
 
-        this.uriField = new JTextField();
-        this.uriField.setPreferredSize(new Dimension(0, 36));
-        this.uriField.putClientProperty(FlatClientProperties.STYLE_CLASS, "uriTextField");
-        this.uriField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Enter search query or URL");
-        this.uriField.setFont(this.uriField.getFont().deriveFont(14.0f));
+        this.uriField = new UriField();
         this.uriField.addActionListener(e -> inputConsumer.accept(this.uriField.getText()));
-        JLabel icon = new JLabel(AddressBar.loadIcon("shield_locked_24"));
-        icon.setBorder(new EmptyBorder(0, 8, 0, 4));
-        this.uriField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, icon);
-        SelectIfNotDraggedListener.install(this.uriField);
         this.add(this.uriField);
 
         this.moreButton = new AddressBarButton("more_vert_24");
         this.add(this.moreButton);
     }
 
-    @Override
-    public void requestFocus() {
-        this.uriField.requestFocus();
-    }
-
-    private static FlatSVGIcon loadIcon(String name) {
+    public static FlatSVGIcon loadIcon(String name) {
         return new FlatSVGIcon(AddressBar.class.getResource("/icons/" + name + ".svg"))
             .derive(18, 18)
             .setColorFilter(new FlatSVGIcon.ColorFilter(color -> UIManager.getColor("addressBarEnabledButtonColor")));
@@ -95,6 +82,10 @@ public class AddressBar extends JToolBar {
 
     public JButton getRefreshButton() {
         return this.refreshButton;
+    }
+
+    public UriField getUriField() {
+        return this.uriField;
     }
 
     public JButton getMoreButton() {

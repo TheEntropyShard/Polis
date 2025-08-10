@@ -23,6 +23,7 @@ import com.formdev.flatlaf.FlatLaf;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.function.IntConsumer;
 
 import me.theentropyshard.polis.gemini.client.GeminiClient;
@@ -39,7 +40,7 @@ public class Gui {
     public Gui() {
         Gui.prepare(false);
 
-        this.tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        this.tabbedPane = new FocusPersistentTabbedPane(JTabbedPane.TOP);
         this.tabbedPane.setPreferredSize(new Dimension(1280, 720));
         this.tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
         this.tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (IntConsumer) this::onTabClose);
@@ -49,6 +50,13 @@ public class Gui {
             tab.load(file.toURI());
             this.tabbedPane.addTab("Title", tab);
         }));
+
+        SwingUtils.createAction(
+            this.tabbedPane,
+            "Ctrl+T",
+            KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_DOWN_MASK),
+            e -> this.createEmptyTab()
+        );
 
         this.createEmptyTab();
 
@@ -71,6 +79,7 @@ public class Gui {
 
     public void createEmptyTab() {
         this.tabbedPane.addTab("Title", new Tab(this.client));
+        this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() - 1);
     }
 
     private static void prepare(boolean darkTheme) {
