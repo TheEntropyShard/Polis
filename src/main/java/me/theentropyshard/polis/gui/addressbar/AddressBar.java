@@ -26,8 +26,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.function.Consumer;
 
 public class AddressBar extends JToolBar {
@@ -70,17 +68,7 @@ public class AddressBar extends JToolBar {
         this.moreButton.putClientProperty(FlatClientProperties.STYLE, "toolbar.spacingInsets: 6,8,6,8");
         this.add(this.moreButton);
 
-        this.uriField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                AddressBar.this.uriField.selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                AddressBar.this.uriField.select(0, 0);
-            }
-        });
+        SelectIfNotDraggedListener.install(this.uriField);
     }
 
     @Override
