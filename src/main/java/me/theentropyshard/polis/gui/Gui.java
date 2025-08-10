@@ -27,7 +27,9 @@ import java.util.function.IntConsumer;
 
 import me.theentropyshard.polis.gemini.client.GeminiClient;
 import me.theentropyshard.polis.gui.emoji.EmojiSupport;
+import me.theentropyshard.polis.gui.laf.DarkPolisLaf;
 import me.theentropyshard.polis.gui.laf.LightPolisLaf;
+import me.theentropyshard.polis.utils.SwingUtils;
 
 public class Gui {
     private final JTabbedPane tabbedPane;
@@ -35,7 +37,7 @@ public class Gui {
     private final GeminiClient client = new GeminiClient();
 
     public Gui() {
-        Gui.prepare();
+        Gui.prepare(false);
 
         this.tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         this.tabbedPane.setPreferredSize(new Dimension(1280, 720));
@@ -44,7 +46,7 @@ public class Gui {
 
         this.tabbedPane.setDropTarget(new FileDropTarget(file -> {
             Tab tab = new Tab(this.client);
-            tab.loadFromFile(file);
+            tab.load(file.toURI());
             this.tabbedPane.addTab("Title", tab);
         }));
 
@@ -55,7 +57,7 @@ public class Gui {
         frame.add(this.tabbedPane, BorderLayout.CENTER);
         frame.pack();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
+        SwingUtils.centerWindow(frame, 0);
         frame.setVisible(true);
     }
 
@@ -71,13 +73,7 @@ public class Gui {
         this.tabbedPane.addTab("Title", new Tab(this.client));
     }
 
-    public void createTab(String url) {
-        Tab tab = new Tab(this.client);
-        tab.loadFromUrl(url);
-        this.tabbedPane.addTab("Title", tab);
-    }
-
-    private static void prepare() {
+    private static void prepare(boolean darkTheme) {
         JDialog.setDefaultLookAndFeelDecorated(true);
         JFrame.setDefaultLookAndFeelDecorated(true);
 
@@ -85,7 +81,11 @@ public class Gui {
 
         FlatLaf.registerCustomDefaultsSource("themes");
 
-        LightPolisLaf.setup();
+        if (darkTheme) {
+            DarkPolisLaf.setup();
+        } else {
+            LightPolisLaf.setup();
+        }
 
         EmojiSupport.init();
     }

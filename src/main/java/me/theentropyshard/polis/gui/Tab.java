@@ -22,15 +22,14 @@ import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.plaf.LayerUI;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import me.theentropyshard.polis.gemini.client.GeminiClient;
 import me.theentropyshard.polis.gemini.client.GeminiRequest;
@@ -40,6 +39,7 @@ import me.theentropyshard.polis.gemini.gemtext.document.GemtextH1Element;
 import me.theentropyshard.polis.gemini.gemtext.document.GemtextParagraphElement;
 import me.theentropyshard.polis.gui.addressbar.AddressBar;
 import me.theentropyshard.polis.gui.gemtext.GemtextPane;
+import me.theentropyshard.polis.utils.SwingUtils;
 
 public class Tab extends JPanel {
     public static final boolean USE_PROXY = true;
@@ -51,39 +51,14 @@ public class Tab extends JPanel {
     private final JScrollPane scrollPane;
 
     private URI currentUri;
+    private String hoveredUrl;
 
     private SwingWorker<Void, Void> currentWorker;
-
-    private String hoveredUrl;
 
     public Tab(GeminiClient client) {
         this.setLayout(new BorderLayout());
 
         this.client = client;
-
-        this.gemtextPane = new GemtextPane();
-        this.gemtextPane.addHyperlinkListener(e -> {
-            HyperlinkEvent.EventType type = e.getEventType();
-
-            if (type == HyperlinkEvent.EventType.ACTIVATED) {
-                this.currentUri = this.currentUri.resolve(e.getDescription());
-
-                this.reload();
-            } else if (type == HyperlinkEvent.EventType.ENTERED) {
-                this.hoveredUrl = e.getDescription();
-            } else if (type == HyperlinkEvent.EventType.EXITED) {
-                this.hoveredUrl = null;
-            }
-
-            this.repaint();
-        });
-
-        this.scrollPane = new JScrollPane(
-            this.gemtextPane,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-        );
-        this.scrollPane.setUI(new FlatSmoothScrollPaneUI());
 
         JPopupMenu popupMenu = new JPopupMenu();
 
@@ -93,18 +68,44 @@ public class Tab extends JPanel {
         });
         popupMenu.add(savePageItem);
 
-        this.addressBar = new AddressBar(input -> {
-            if (!input.startsWith("gemini://")) {
-                input = "gemini://" + input;
+        this.gemtextPane = new GemtextPane();
+        this.gemtextPane.addHyperlinkListener(e -> {
+            HyperlinkEvent.EventType type = e.getEventType();
+
+            if (type == HyperlinkEvent.EventType.ACTIVATED) {
+                this.load(this.currentUri.resolve(e.getDescription()));
+            } else if (type == HyperlinkEvent.EventType.ENTERED) {
+                this.hoveredUrl = e.getDescription();
+            } else if (type == HyperlinkEvent.EventType.EXITED) {
+                this.hoveredUrl = null;
             }
 
-            this.currentUri = URI.create(input);
-
-            this.scrollPane.requestFocus();
-
-            this.reload();
+            this.repaint();
         });
 
+        this.addressBar = new AddressBar(input -> {
+            URI uri;
+
+            try {
+                uri = new URI(input);
+            } catch (URISyntaxException e) {
+                this.handleException(e);
+
+                return;
+            }
+
+            String scheme = uri.getScheme();
+            if (scheme == null || scheme.trim().isEmpty()) {
+                uri = URI.create("gemini://" + uri);
+            }
+
+            String path = uri.getPath();
+            if (path == null || path.trim().isEmpty()) {
+                uri = URI.create(uri + "/");
+            }
+
+            this.load(uri);
+        });
         this.addressBar.getMoreButton().addActionListener(e -> {
             JButton b = (JButton) e.getSource();
 
@@ -114,8 +115,14 @@ public class Tab extends JPanel {
                 b.getY() + b.getPreferredSize().height
             );
         });
-
         this.add(this.addressBar, BorderLayout.NORTH);
+
+        this.scrollPane = new JScrollPane(
+            this.gemtextPane,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+        this.scrollPane.setUI(new FlatSmoothScrollPaneUI());
 
         this.add(new JLayer<>(this.scrollPane, new LayerUI<>() {
             @Override
@@ -129,109 +136,104 @@ public class Tab extends JPanel {
                 }
 
                 Dimension size = c.getSize();
-                int width = size.width;
-                int height = size.height;
-
                 Rectangle2D bounds = g.getFontMetrics().getStringBounds(url, g);
 
                 int rectX = 0;
-                int rectY = (int) (height - bounds.getHeight()) - 3;
+                int rectY = (int) (size.height - bounds.getHeight()) - 3;
                 int rectWidth = (int) bounds.getWidth() + 6;
                 int rectHeight = (int) bounds.getHeight() + 3;
 
-                g.setColor(Color.decode("#EDF2FA"));
+                g.setColor(UIManager.getColor("linkPreviewBackground"));
                 g.fillRect(rectX, rectY, rectWidth, rectHeight);
 
-                g.setColor(Color.BLACK);
+                g.setColor(UIManager.getColor("linkPreviewBorder"));
                 g.drawRect(rectX, rectY, rectWidth, rectHeight);
 
                 int textX = 3;
-                int textY = height - g.getFontMetrics().getMaxDescent() - 3;
+                int textY = size.height - g.getFontMetrics().getMaxDescent() - 3;
 
                 g.drawString(url, textX, textY);
             }
         }), BorderLayout.CENTER);
 
-        this.getActionMap().put("ctrl_l", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Tab.this.addressBar.requestFocus();
+        SwingUtils.createAction(
+            this,
+            "Ctrl+L",
+            KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK),
+            e -> {
+                this.addressBar.requestFocus();
             }
-        });
-
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-            .put(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK), "ctrl_l");
+        );
     }
 
-    public void load(String location, InputStream inputStream) throws IOException {
-        this.addressBar.setCurrentUri(location);
-
+    public void readStream(InputStream inputStream) throws IOException {
         new GemtextParser().parse(inputStream, this.gemtextPane::writeElement);
     }
 
-    public void loadFromFile(File file) {
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                Tab.this.load(file.toURI().toString(), Files.newInputStream(file.toPath()));
+    public void load(URI uri) {
+        this.gemtextPane.clear();
+        this.scrollPane.requestFocus();
 
-                return null;
-            }
-        }.execute();
-    }
+        this.currentUri = uri;
+        this.addressBar.setCurrentUri(this.currentUri.toString());
 
-    public void loadFromUrl(String url) {
-        this.currentUri = URI.create(url);
-
-        String path = this.currentUri.getPath();
-        if (path == null || path.trim().isEmpty()) {
-            this.currentUri = URI.create(this.currentUri.toString() + "/");
+        if (this.currentWorker != null && !this.currentWorker.isDone()) {
+            this.currentWorker.cancel(true);
         }
 
-        this.currentWorker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                if (Tab.USE_PROXY) {
-                    String theUrl = Tab.this.currentUri.getHost() + Tab.this.currentUri.getPath();
+        this.currentWorker = SwingUtils.createWorker(() -> {
+            try {
+                String scheme = uri.getScheme();
 
-                    String query = Tab.this.currentUri.getQuery();
-                    if (query != null && !query.trim().isEmpty()) {
-                        theUrl += URLEncoder.encode("?" + query, StandardCharsets.UTF_8);
+                switch (scheme) {
+                    case "gemini" -> {
+                        if (Tab.USE_PROXY) {
+                            this.loadFromUrlWithProxy(this.currentUri);
+                        } else {
+                            this.loadFromUrl(this.currentUri);
+                        }
                     }
 
-                    HttpURLConnection c = (HttpURLConnection) new URL(
-                        "https://portal.mozz.us/gemini/" + theUrl + "?raw=1"
-                    ).openConnection();
+                    case "file" -> this.readStream(Files.newInputStream(Path.of(this.currentUri)));
 
-                    Tab.this.load(url, c.getInputStream());
-                } else {
-                    try (GeminiResponse response = Tab.this.client.send(new GeminiRequest(url))) {
-                        Tab.this.load(url, response.getInputStream());
-                    } catch (UnknownHostException e) {
-                        SwingUtilities.invokeLater(() -> {
-                            Tab.this.gemtextPane.clear();
-                            Tab.this.gemtextPane.writeElement(new GemtextH1Element("Unknown host «" + Tab.this.currentUri.getHost() + "»"));
-                            Tab.this.gemtextPane.writeElement(new GemtextParagraphElement("Host «" + Tab.this.currentUri.getHost() + "» does not exist. " +
-                                "Check if the URL is correct."));
-                        });
-                    } catch (Exception e) {
-                        SwingUtilities.invokeLater(() -> {
-                            Tab.this.gemtextPane.clear();
-                            Tab.this.gemtextPane.writeElement(new GemtextH1Element("Error loading " + url));
-                            Tab.this.gemtextPane.writeElement(new GemtextParagraphElement(e.toString()));
-                        });
-                    }
+                    default -> System.out.println("Unsupported scheme: " + scheme);
                 }
-
-                return null;
+            } catch (Exception e) {
+                this.handleException(e);
             }
-        };
+        });
         this.currentWorker.execute();
     }
 
-    private void reload() {
-        this.gemtextPane.clear();
+    private void handleException(Exception e) {
+        SwingUtilities.invokeLater(() -> {
+            this.gemtextPane.clear();
 
-        this.loadFromUrl(this.currentUri.toString());
+            if (e instanceof UnknownHostException) {
+                this.gemtextPane.writeElement(new GemtextH1Element("Unknown host «" + this.currentUri.getHost() + "»"));
+                this.gemtextPane.writeElement(new GemtextParagraphElement("Host «" + this.currentUri.getHost() + "» does not exist. " +
+                    "Check if the URL is correct."));
+            } else {
+                this.gemtextPane.writeElement(new GemtextH1Element("Error loading " + this.currentUri));
+                this.gemtextPane.writeElement(new GemtextParagraphElement(e.toString()));
+            }
+        });
+    }
+
+    public void loadFromUrl(URI uri) throws Exception {
+        try (GeminiResponse response = this.client.send(new GeminiRequest(uri))) {
+            this.readStream(response.getInputStream());
+        }
+    }
+
+    private void loadFromUrlWithProxy(URI uri) throws Exception {
+        String theUrl = uri.getHost() + uri.getPath();
+
+        String query = uri.getQuery();
+        if (query != null && !query.trim().isEmpty()) {
+            theUrl += URLEncoder.encode("?" + query, StandardCharsets.UTF_8);
+        }
+
+        this.readStream(new URL("https://portal.mozz.us/gemini/" + theUrl + "?raw=1").openConnection().getInputStream());
     }
 }

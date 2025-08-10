@@ -77,9 +77,9 @@ public class GemtextPane extends JTextPane {
                 MutableAttributeSet attrs = new SimpleAttributeSet();
 
                 if (type == HyperlinkEvent.EventType.ENTERED) {
-                    StyleConstants.setForeground(attrs, Color.BLUE);
+                    StyleConstants.setForeground(attrs, UIManager.getColor("linkHoveredColor"));
                 } else {
-                    StyleConstants.setForeground(attrs, UIManager.getColor("primary"));
+                    StyleConstants.setForeground(attrs, UIManager.getColor("linkColor"));
                 }
 
                 Element element = e.getSourceElement();
