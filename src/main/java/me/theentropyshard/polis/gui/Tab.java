@@ -57,6 +57,8 @@ public class Tab extends JPanel {
     private String hoveredUrl;
 
     public Tab(GeminiClient client) {
+        this.setLayout(new BorderLayout());
+
         this.client = client;
 
         this.gemtextPane = new GemtextPane();
@@ -159,8 +161,6 @@ public class Tab extends JPanel {
 
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
             .put(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK), "ctrl_l");
-
-        this.setLayout(new BorderLayout());
     }
 
     public void load(String location, InputStream inputStream) throws IOException {
