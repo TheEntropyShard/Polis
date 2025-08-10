@@ -18,17 +18,16 @@
 
 package me.theentropyshard.polis.gemini.gemtext;
 
-import me.theentropyshard.polis.gemini.gemtext.document.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+
+import me.theentropyshard.polis.gemini.gemtext.document.*;
 
 public class GemtextParser {
     private static final String PREFORMATTED_START = "```";
@@ -54,6 +53,10 @@ public class GemtextParser {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
+                if (Thread.interrupted()) {
+                    return;
+                }
+
                 if (!line.startsWith(GemtextParser.LIST_ITEM_START) && listElement != null) {
                     elementConsumer.accept(listElement);
                     listElement = null;
