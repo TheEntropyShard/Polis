@@ -37,7 +37,8 @@ public class AddressBar extends JToolBar {
     public AddressBar(Consumer<String> inputConsumer) {
         super(JToolBar.HORIZONTAL);
 
-        this.setBorder(new CompoundBorder(new MatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+        this.setBorder(new CompoundBorder(new MatteBorder(0, 0, 1, 0,
+            UIManager.getColor("addressBarBorderColor")),
             new EmptyBorder(4, 2, 4, 2)));
 
         JButton backButton = new JButton(AddressBar.loadIcon("arrow_back_24"));
@@ -57,17 +58,9 @@ public class AddressBar extends JToolBar {
         JLabel icon = new JLabel(AddressBar.loadIcon("shield_locked_24"));
         icon.setBorder(new EmptyBorder(0, 8, 0, 4));
         this.uriField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, icon);
-        this.uriField.putClientProperty(FlatClientProperties.STYLE, """
-            arc: 999;
-            background: #EDF2FA;
-            borderColor: #EDF2FA;
-            focusedBackground: #FFFFFF;
-            focusColor: #0B57D0;
-            focusWidth: 1;
-            placeholderForeground: #101010;
-            """);
-        this.uriField.setFont(this.uriField.getFont().deriveFont(14.0f));
+        this.uriField.putClientProperty(FlatClientProperties.STYLE_CLASS, "uriTextField");
         this.uriField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Enter search query or URL");
+        this.uriField.setFont(this.uriField.getFont().deriveFont(14.0f));
         this.uriField.addActionListener(e -> {
             inputConsumer.accept(this.uriField.getText());
         });
@@ -80,12 +73,12 @@ public class AddressBar extends JToolBar {
         this.uriField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                uriField.selectAll();
+                AddressBar.this.uriField.selectAll();
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-                uriField.select(0, 0);
+                AddressBar.this.uriField.select(0, 0);
             }
         });
     }
@@ -96,10 +89,9 @@ public class AddressBar extends JToolBar {
     }
 
     private static FlatSVGIcon loadIcon(String name) {
-        return new FlatSVGIcon(
-            AddressBar.class.getResource("/icons/" + name + ".svg")
-        ).derive(18, 18)
-            .setColorFilter(new FlatSVGIcon.ColorFilter(color -> Color.DARK_GRAY.darker()));
+        return new FlatSVGIcon(AddressBar.class.getResource("/icons/" + name + ".svg"))
+            .derive(18, 18)
+            .setColorFilter(new FlatSVGIcon.ColorFilter(color -> UIManager.getColor("addressBarEnabledButtonColor")));
     }
 
     public void setCurrentUri(String uri) {
