@@ -225,6 +225,10 @@ public class Tab extends JPanel {
     }
 
     public void load(URI uri) {
+        if (uri == null) {
+            return;
+        }
+
         this.gemtextPane.clear();
         this.scrollPane.requestFocus();
 
