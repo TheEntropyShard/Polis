@@ -37,4 +37,9 @@ public class UriField extends JTextField {
         icon.setBorder(new EmptyBorder(0, 8, 0, 4));
         this.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, icon);
     }
+
+    public void focus() {
+        this.requestFocus();
+        this.selectAll();
+    }
 }

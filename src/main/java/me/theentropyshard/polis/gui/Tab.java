@@ -162,7 +162,7 @@ public class Tab extends JPanel {
             this,
             "Ctrl+L",
             KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK),
-            e -> this.addressBar.getUriField().requestFocus()
+            e -> this.addressBar.getUriField().focus()
         );
 
         SwingUtils.createAction(
