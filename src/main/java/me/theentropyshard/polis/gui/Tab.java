@@ -44,12 +44,12 @@ import me.theentropyshard.polis.gui.gemtext.GemtextPane;
 import me.theentropyshard.polis.utils.SwingUtils;
 
 public class Tab extends JPanel {
-    public static final boolean USE_PROXY = true;
+    public static final boolean USE_PROXY = false;
 
     private final GeminiClient client;
 
     private final AddressBar addressBar;
-    private final GemtextPane gemtextPane;
+    private GemtextPane gemtextPane;
     private final JScrollPane scrollPane;
 
     private final History history;
@@ -73,7 +73,7 @@ public class Tab extends JPanel {
         savePageItem.addActionListener(e -> this.savePage());
         popupMenu.add(savePageItem);
 
-        this.gemtextPane = new GemtextPane();
+        this.resetGemtextPane();
 
         this.history = new History();
 
@@ -114,7 +114,6 @@ public class Tab extends JPanel {
         this.add(this.addressBar, BorderLayout.NORTH);
 
         this.scrollPane = new JScrollPane(
-            this.gemtextPane,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
@@ -178,6 +177,10 @@ public class Tab extends JPanel {
         this.addressBar.getBackButton().addActionListener(e -> this.navigateBack());
         this.addressBar.getForwardButton().addActionListener(e -> this.navigateForward());
         this.addressBar.getRefreshButton().addActionListener(e -> this.refresh());
+    }
+
+    private void resetGemtextPane() {
+        this.gemtextPane = new GemtextPane();
 
         this.gemtextPane.addHyperlinkListener(e -> {
             HyperlinkEvent.EventType type = e.getEventType();
@@ -195,6 +198,8 @@ public class Tab extends JPanel {
 
             this.repaint();
         });
+
+        this.scrollPane.setViewportView(this.gemtextPane);
     }
 
     private void savePage() {
@@ -246,7 +251,8 @@ public class Tab extends JPanel {
             return;
         }
 
-        this.gemtextPane.clear();
+        this.resetGemtextPane();
+
         this.scrollPane.requestFocus();
 
         this.currentUri = uri;

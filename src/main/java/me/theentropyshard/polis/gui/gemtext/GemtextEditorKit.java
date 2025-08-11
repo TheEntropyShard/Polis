@@ -31,16 +31,12 @@ public class GemtextEditorKit extends StyledEditorKit {
 
     @Override
     public Document createDefaultDocument() {
-        return new GemtextDocument(this.getEditor());
-    }
-
-    private GemtextPane getEditor() {
-        return this.pane;
+        return new GemtextDocument();
     }
 
     @Override
     public ViewFactory getViewFactory() {
-        return new GemtextViewFactory(pane);
+        return new GemtextViewFactory(this.pane);
     }
 
     @Override

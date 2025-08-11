@@ -21,13 +21,7 @@ package me.theentropyshard.polis.gui.gemtext;
 import javax.swing.text.DefaultStyledDocument;
 
 public class GemtextDocument extends DefaultStyledDocument {
-    private final GemtextPane pane;
+    public GemtextDocument() {
 
-    public GemtextDocument(GemtextPane pane) {
-        this.pane = pane;
-    }
-
-    public GemtextPane getEditor() {
-        return this.pane;
     }
 }
