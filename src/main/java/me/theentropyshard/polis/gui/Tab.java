@@ -105,7 +105,7 @@ public class Tab extends JPanel {
 
             popupMenu.show(
                 this,
-                this.getParent().getPreferredSize().width - popupMenu.getPreferredSize().width,
+                this.getParent().getSize().width - popupMenu.getPreferredSize().width,
                 b.getY() + b.getPreferredSize().height
             );
         });
