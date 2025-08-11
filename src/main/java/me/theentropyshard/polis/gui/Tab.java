@@ -69,21 +69,8 @@ public class Tab extends JPanel {
         JPopupMenu popupMenu = new JPopupMenu();
 
         JMenuItem savePageItem = new JMenuItem("Save page");
-        savePageItem.addActionListener(e -> {
-            SwingUtils.createWorker(() -> {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("Gemtext files (*.gmi)", "gmi"));
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-                if (fileChooser.showSaveDialog(Gui.parent) == JFileChooser.APPROVE_OPTION) {
-                    try {
-                        Files.write(fileChooser.getSelectedFile().toPath(), this.pageSource);
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }).execute();
-        });
+        savePageItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+        savePageItem.addActionListener(e -> this.savePage());
         popupMenu.add(savePageItem);
 
         this.gemtextPane = new GemtextPane();
@@ -167,6 +154,13 @@ public class Tab extends JPanel {
 
         SwingUtils.createAction(
             this,
+            "Ctrl+S",
+            KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK),
+            e -> this.savePage()
+        );
+
+        SwingUtils.createAction(
+            this,
             "Ctrl+L",
             KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK),
             e -> this.addressBar.getUriField().requestFocus()
@@ -201,6 +195,22 @@ public class Tab extends JPanel {
 
             this.repaint();
         });
+    }
+
+    private void savePage() {
+        SwingUtils.createWorker(() -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Gemtext files (*.gmi)", "gmi"));
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            if (fileChooser.showSaveDialog(Gui.parent) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    Files.write(fileChooser.getSelectedFile().toPath(), this.pageSource);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }).execute();
     }
 
     private void historyVisit(URI uri) {
