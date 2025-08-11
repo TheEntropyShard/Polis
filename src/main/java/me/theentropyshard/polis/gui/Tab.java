@@ -73,8 +73,6 @@ public class Tab extends JPanel {
         savePageItem.addActionListener(e -> this.savePage());
         popupMenu.add(savePageItem);
 
-        this.resetGemtextPane();
-
         this.history = new History();
 
         this.addressBar = new AddressBar(input -> {
@@ -118,6 +116,8 @@ public class Tab extends JPanel {
             JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
         this.scrollPane.setUI(new FlatSmoothScrollPaneUI());
+
+        this.resetGemtextPane();
 
         this.add(new JLayer<>(this.scrollPane, new LayerUI<>() {
             @Override
