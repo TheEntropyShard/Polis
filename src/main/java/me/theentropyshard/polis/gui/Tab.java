@@ -22,8 +22,6 @@ import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.plaf.LayerUI;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -49,7 +47,7 @@ public class Tab extends JPanel {
 
     private final GeminiClient client;
 
-    private AddressBar addressBar;
+    private final AddressBar addressBar;
     private final GemtextPane gemtextPane;
     private final JScrollPane scrollPane;
 
@@ -59,8 +57,6 @@ public class Tab extends JPanel {
     private String hoveredUrl;
 
     private SwingWorker<Void, Void> currentWorker;
-
-    private boolean uriFieldWasFocused;
 
     public Tab(GeminiClient client) {
         this.setLayout(new BorderLayout());
@@ -190,10 +186,6 @@ public class Tab extends JPanel {
 
             this.repaint();
         });
-    }
-
-    public AddressBar getAddressBar() {
-        return this.addressBar;
     }
 
     private void historyVisit(URI uri) {
