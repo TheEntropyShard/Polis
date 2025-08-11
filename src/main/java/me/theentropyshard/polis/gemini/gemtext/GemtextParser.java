@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import me.theentropyshard.polis.gemini.gemtext.document.*;
+import me.theentropyshard.polis.utils.BufferInputStream;
 
 public class GemtextParser {
     private static final String PREFORMATTED_START = "```";
@@ -42,7 +43,9 @@ public class GemtextParser {
 
     }
 
-    public void parse(InputStream inputStream, Consumer<GemtextElement> elementConsumer) throws IOException {
+    public byte[] parse(InputStream inputStream, Consumer<GemtextElement> elementConsumer) throws IOException {
+        BufferInputStream bufferInputStream = new BufferInputStream(inputStream);
+
         boolean inPreBlock = false;
         String preCaption = null;
         List<String> preContents = new ArrayList<>();
@@ -50,11 +53,11 @@ public class GemtextParser {
 
         GemtextListElement listElement = null;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(bufferInputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (Thread.interrupted()) {
-                    return;
+                    return new byte[0];
                 }
 
                 if (!line.startsWith(GemtextParser.LIST_ITEM_START) && listElement != null) {
@@ -128,5 +131,7 @@ public class GemtextParser {
         if (listElement != null) {
             elementConsumer.accept(listElement);
         }
+
+        return bufferInputStream.toByteArray();
     }
 }

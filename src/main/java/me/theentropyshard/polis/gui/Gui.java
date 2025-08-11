@@ -37,6 +37,8 @@ public class Gui {
 
     private final GeminiClient client = new GeminiClient();
 
+    public static JFrame parent;
+
     public Gui() {
         Gui.prepare(false);
 
@@ -60,7 +62,7 @@ public class Gui {
 
         this.createEmptyTab();
 
-        JFrame frame = new JFrame("Polis");
+        JFrame frame = Gui.parent = new JFrame("Polis");
         frame.getRootPane().putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT, true);
         frame.add(this.tabbedPane, BorderLayout.CENTER);
         frame.pack();

@@ -20,6 +20,7 @@ package me.theentropyshard.polis.gui;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.LayerUI;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -56,6 +57,8 @@ public class Tab extends JPanel {
     private URI currentUri;
     private String hoveredUrl;
 
+    private byte[] pageSource;
+
     private SwingWorker<Void, Void> currentWorker;
 
     public Tab(GeminiClient client) {
@@ -67,7 +70,19 @@ public class Tab extends JPanel {
 
         JMenuItem savePageItem = new JMenuItem("Save page");
         savePageItem.addActionListener(e -> {
+            SwingUtils.createWorker(() -> {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Gemtext files (*.gmi)", "gmi"));
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
+                if (fileChooser.showSaveDialog(Gui.parent) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        Files.write(fileChooser.getSelectedFile().toPath(), this.pageSource);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }).execute();
         });
         popupMenu.add(savePageItem);
 
@@ -209,7 +224,7 @@ public class Tab extends JPanel {
     }
 
     public void readStream(InputStream inputStream) throws IOException {
-        new GemtextParser().parse(inputStream, this.gemtextPane::writeElement);
+        this.pageSource = new GemtextParser().parse(inputStream, this.gemtextPane::writeElement);
     }
 
     public void refresh() {
