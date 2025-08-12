@@ -18,12 +18,7 @@
 
 package me.theentropyshard.polis.gui.gemtext;
 
-import com.formdev.flatlaf.util.UIScale;
-
-import javax.swing.*;
 import javax.swing.text.*;
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
 
 public class GemtextViewFactory implements ViewFactory {
     private final GemtextPane textPane;
@@ -36,105 +31,32 @@ public class GemtextViewFactory implements ViewFactory {
     public View create(Element element) {
         String kind = element.getName();
 
-        if (kind != null) {
-            switch (kind) {
-                case "blockquote" -> {
-                    return new BlockquoteView(element);
-                }
-                case "listItem" -> {
-                    return new ListItemView(element);
-                }
-                case "link" -> {
-                    return new LinkView(element);
-                }
-                case AbstractDocument.ContentElementName -> {
-                    return new LabelView(element);
-                }
-                case AbstractDocument.ParagraphElementName -> {
-                    return new ParagraphView(element);
-                }
-                case AbstractDocument.SectionElementName -> {
-                    return new BoxView(element, View.Y_AXIS) {
-                        @Override
-                        protected short getLeftInset() {
-                            return 240;
-                        }
-
-                        @Override
-                        protected short getRightInset() {
-                            return 240;
-                        }
-                    };
-                }
-                case StyleConstants.ComponentElementName -> {
-                    return new ComponentView(element);
-                }
-                case StyleConstants.IconElementName -> {
-                    return new CustomIconView(textPane, element);
-                }
-            }
+        if (kind == null) {
+            return new LabelView(element);
         }
 
-        return new LabelView(element);
-    }
+        return switch (kind) {
+            case "blockquote" -> new BlockquoteView(element);
+            case "listItem" -> new ListItemView(element);
+            case "link" -> new LinkView(element);
+            case AbstractDocument.ContentElementName -> new LabelView(element);
+            case AbstractDocument.ParagraphElementName -> new ParagraphView(element);
+            case AbstractDocument.SectionElementName -> new BoxView(element, View.Y_AXIS) {
+                @Override
+                protected short getLeftInset() {
+                    return 240;
+                }
 
-    private static class CustomIconView extends IconView {
+                @Override
+                protected short getRightInset() {
+                    return 240;
+                }
+            };
 
-        private final GemtextPane textPane;
+            case StyleConstants.ComponentElementName -> new ComponentView(element);
+            case StyleConstants.IconElementName -> new EmojiView(element, this.textPane);
 
-        public CustomIconView(GemtextPane textPane, Element elem) {
-            super(elem);
-            this.textPane = textPane;
-        }
-
-        @Override
-        public float getAlignment(int axis) {
-            if (axis == X_AXIS) {
-                return super.getAlignment(axis);
-            } else {
-                //  Set Icon alignment to top
-                return 0.8f;
-            }
-        }
-
-        @Override
-        public int getNextVisualPositionFrom(int pos, Position.Bias b, Shape a, int direction, Position.Bias[] biasRet) throws BadLocationException {
-            int next = super.getNextVisualPositionFrom(pos, b, a, direction, biasRet);
-            if (direction == SwingConstants.WEST && (pos == -1 || pos > getStartOffset())) {
-                //  Still have issues when press arrow key to move cursor back
-                return getStartOffset();
-            }
-            if (direction == SwingConstants.EAST && pos != -1) {
-                return getEndOffset();
-            }
-            return next;
-        }
-
-        private boolean isSelected() {
-            int start = textPane.getSelectionStart();
-            int end = textPane.getSelectionEnd();
-            if (start == end) {
-                return false;
-            }
-            if (start <= getStartOffset() && end >= getEndOffset()) {
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public void paint(Graphics g, Shape a) {
-            if (isSelected()) {
-                //  For test not yet fix
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setColor(textPane.getSelectionColor());
-                Rectangle2D rectangle = a.getBounds2D();
-                float y = UIScale.scale(0.8f);
-                float h = UIScale.scale(1.4f);
-                g2.fill(new Rectangle2D.Double(rectangle.getX(), rectangle.getY() + y, rectangle.getWidth(), rectangle.getHeight() - h));
-                g2.dispose();
-            }
-            super.paint(g, a);
-        }
+            default -> new LabelView(element);
+        };
     }
 }
