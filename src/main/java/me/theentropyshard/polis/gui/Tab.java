@@ -89,7 +89,9 @@ public class Tab extends JPanel {
                 uri = URI.create(uri + "/");
             }
 
-            this.historyVisit(uri);
+            if (!uri.equals(this.currentUri)) {
+                this.historyVisit(uri);
+            }
 
             this.load(uri);
         });
