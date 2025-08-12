@@ -34,6 +34,7 @@ import me.theentropyshard.polis.utils.SwingUtils;
 
 public class Gui {
     private final JTabbedPane tabbedPane;
+    private final JPopupMenu popupMenu;
 
     private final GeminiClient client = new GeminiClient();
 
@@ -48,7 +49,7 @@ public class Gui {
         this.tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (IntConsumer) this::onTabClose);
 
         this.tabbedPane.setDropTarget(new FileDropTarget(file -> {
-            Tab tab = new Tab(this.client);
+            Tab tab = new Tab(this, this.client);
             tab.load(file.toURI());
             this.tabbedPane.addTab("Title", tab);
         }));
@@ -59,6 +60,41 @@ public class Gui {
             KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_DOWN_MASK),
             e -> this.createEmptyTab()
         );
+
+        this.popupMenu = new JPopupMenu();
+
+        JMenuItem newTabItem = new JMenuItem("New tab");
+        newTabItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_DOWN_MASK));
+        newTabItem.addActionListener(e -> this.createEmptyTab());
+        this.popupMenu.add(newTabItem);
+
+        this.popupMenu.addSeparator();
+
+        JMenuItem historyItem = new JMenuItem("History");
+        historyItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK));
+        historyItem.addActionListener(e -> {});
+        this.popupMenu.add(historyItem);
+
+        JMenuItem downloadsItem = new JMenuItem("Downloads");
+        downloadsItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.CTRL_DOWN_MASK));
+        downloadsItem.addActionListener(e -> {});
+        this.popupMenu.add(downloadsItem);
+
+        this.popupMenu.addSeparator();
+
+        JMenuItem findItem = new JMenuItem("Find");
+        findItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK));
+        findItem.addActionListener(e -> {});
+        this.popupMenu.add(findItem);
+
+        JMenuItem savePageItem = new JMenuItem("Save page");
+        savePageItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+        savePageItem.addActionListener(e -> {
+            if (this.tabbedPane.getSelectedComponent() instanceof Tab tab) {
+                tab.savePage();
+            }
+        });
+        this.popupMenu.add(savePageItem);
 
         this.createEmptyTab();
 
@@ -71,6 +107,12 @@ public class Gui {
         frame.setVisible(true);
     }
 
+    public void showPopupMenu(Tab tab, int y) {
+        int x = this.tabbedPane.getSize().width - this.popupMenu.getPreferredSize().width;
+
+        this.popupMenu.show(tab, x, y);
+    }
+
     private void onTabClose(int index) {
         this.tabbedPane.removeTabAt(index);
 
@@ -80,7 +122,7 @@ public class Gui {
     }
 
     public void createEmptyTab() {
-        this.tabbedPane.addTab("Title", new Tab(this.client));
+        this.tabbedPane.addTab("Title", new Tab(this, this.client));
         this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() - 1);
     }
 

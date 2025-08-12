@@ -61,17 +61,10 @@ public class Tab extends JPanel {
 
     private SwingWorker<Void, Void> currentWorker;
 
-    public Tab(GeminiClient client) {
+    public Tab(Gui gui, GeminiClient client) {
         this.setLayout(new BorderLayout());
 
         this.client = client;
-
-        JPopupMenu popupMenu = new JPopupMenu();
-
-        JMenuItem savePageItem = new JMenuItem("Save page");
-        savePageItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-        savePageItem.addActionListener(e -> this.savePage());
-        popupMenu.add(savePageItem);
 
         this.history = new History();
 
@@ -103,11 +96,7 @@ public class Tab extends JPanel {
         this.addressBar.getMoreButton().addActionListener(e -> {
             JButton b = (JButton) e.getSource();
 
-            popupMenu.show(
-                this,
-                this.getParent().getSize().width - popupMenu.getPreferredSize().width,
-                b.getY() + b.getPreferredSize().height
-            );
+            gui.showPopupMenu(this, b.getY() + b.getPreferredSize().height);
         });
         this.add(this.addressBar, BorderLayout.NORTH);
 
@@ -202,7 +191,7 @@ public class Tab extends JPanel {
         this.scrollPane.setViewportView(this.gemtextPane);
     }
 
-    private void savePage() {
+    public void savePage() {
         SwingUtils.createWorker(() -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new FileNameExtensionFilter("Gemtext files (*.gmi)", "gmi"));
